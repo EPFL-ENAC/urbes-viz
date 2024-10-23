@@ -93,15 +93,16 @@ const urlSource = computed(() => {
     minimumIntegerDigits: 3,
     useGrouping: false
   })
-  return `/output_images_${props.variableSelected}/${props.variableSelected}_${id}.png`
+  return `/geodata/output_images_${props.variableSelected}/${props.variableSelected}_${id}.png`
 })
 
 watch(urlSource, (url) => {
   if (map) {
-    const source = map.getSource('wrf-layer') as maplibregl.ImageSource
+    const source = map.getSource('wrf-data') as maplibregl.ImageSource
     source.updateImage({ url: url })
   }
 })
+addProtocol('pmtiles', protocol.tile)
 
 onMounted(() => {
   addProtocol('pmtiles', protocol.tile)
@@ -137,16 +138,16 @@ onMounted(() => {
 
     map.addSource('areas', {
       type: 'vector',
-      url: 'pmtiles://pmtiles/hoheitsgebiet.pmtiles',
+      url: 'pmtiles://geodata/hoheitsgebiet.pmtiles',
       minzoom: 5,
-      maxzoom: 14
+      maxzoom: 9
     })
 
     map.addLayer({
       id: 'areas-layer',
       type: 'fill', // or 'line', 'circle', etc., depending on your data
-      source: 'hoheitsgebiet',
-      'source-layer': 'areas'
+      source: 'areas',
+      'source-layer': 'hoheitsgebiet'
     })
 
     map.addSource('wrf-data', {
@@ -172,7 +173,7 @@ onMounted(() => {
     // Add the vector tile source
     map.addSource('buildings', {
       type: 'vector',
-      tiles: ['http://localhost:3000/buildings/{z}/{x}/{y}'], // Martin's tile URL
+      url: 'pmtiles://geodata/buildings_swiss.pmtiles',
       minzoom: 5,
       maxzoom: 14
     })
@@ -182,7 +183,7 @@ onMounted(() => {
       id: 'buildings-layer',
       type: 'fill', // or 'line', 'circle', etc., depending on your data
       source: 'buildings',
-      'source-layer': 'reprojected_buildings', // This should match the layer name inside the MBTiles
+      'source-layer': 'buildings_swiss', // This should match the layer name inside the MBTiles
       paint: {
         'fill-color': [
           'interpolate',
