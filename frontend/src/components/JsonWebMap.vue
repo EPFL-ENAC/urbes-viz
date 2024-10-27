@@ -3,7 +3,7 @@ import MapLibreMap from '@/components/MapLibreMap.vue'
 
 import type { Parameters } from '@/utils/jsonWebMap'
 import axios from 'axios'
-import { ref, shallowRef, triggerRef, watch } from 'vue'
+import { onMounted, ref, shallowRef, triggerRef, watch } from 'vue'
 
 const props = defineProps<{
   styleUrl: string
@@ -18,21 +18,33 @@ const variableSelected = ref<string>('t2')
 
 const idxImage = ref<number>(0)
 
-const possibleLayers = ['buildings-layer', 'wrf-layer', 'areas-layer']
+const possibleLayers = [
+  'buildings-layer',
+  'wrf-layer',
+  'areas-layer',
+  'roads-layer',
+  'roads_swiss_statistics-layer',
+  'roads_swiss_statistics_projection-layer',
+  'gws_data-layer',
+  'statpop_data-layer'
+]
 
-const layersSelected = ref<string[]>(['buildings-layer', 'wrf-layer'])
+const layersSelected = ref<string[]>(['roads_swiss_statistics-layer'])
 
+const syncAllLayersVisibility = (layersSelected: string[]) => {
+  for (let layer of possibleLayers) {
+    if (layersSelected.includes(layer)) {
+      map.value?.setLayerVisibility(layer, true)
+    } else {
+      map.value?.setLayerVisibility(layer, false)
+    }
+  }
+}
 watch(
   () => layersSelected.value,
   (layersSelected) => {
     console.log(layersSelected)
-    for (let layer of possibleLayers) {
-      if (layersSelected.includes(layer)) {
-        map.value?.setLayerVisibility(layer, true)
-      } else {
-        map.value?.setLayerVisibility(layer, false)
-      }
-    }
+    syncAllLayersVisibility(layersSelected)
   }
 )
 
@@ -88,10 +100,11 @@ watch(
           :style-spec="styleUrl"
           :popup-layer-ids="parameters.popupLayerIds"
           :zoom="parameters.zoom"
-          :max-zoom="14"
+          :max-zoom="20"
           :min-zoom="6"
           :idx-image="idxImage"
           :variable-selected="variableSelected"
+          :callback-loaded="() => syncAllLayersVisibility(layersSelected)"
           class="flex-grow-1"
         />
 

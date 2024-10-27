@@ -140,7 +140,7 @@ onMounted(() => {
       type: 'vector',
       url: 'pmtiles://geodata/hoheitsgebiet.pmtiles',
       minzoom: 5,
-      maxzoom: 9
+      maxzoom: 17
     })
 
     map.addLayer({
@@ -148,6 +148,141 @@ onMounted(() => {
       type: 'fill', // or 'line', 'circle', etc., depending on your data
       source: 'areas',
       'source-layer': 'hoheitsgebiet'
+    })
+
+    map.addSource('roads_swiss_statistics', {
+      type: 'vector',
+      url: 'pmtiles://geodata/roads_swiss_statistics.pmtiles'
+    })
+
+    map.addLayer({
+      id: 'roads_swiss_statistics-layer',
+      type: 'line',
+      source: 'roads_swiss_statistics',
+      'source-layer': 'roads_swiss_statistics',
+      paint: {
+        'line-color': [
+          'interpolate',
+          ['linear'],
+          ['get', 'DWV_PW'], // Using DWV as the base metric for traffic intensity
+          0,
+          '#b0e0e6', // Light color for low traffic
+          5000,
+          '#4682b4', // Moderate traffic
+          10000,
+          '#ff4500', // High traffic
+          20000,
+          '#8b0000' // Very high traffic
+        ],
+        'line-width': [
+          'interpolate',
+          ['linear'],
+          ['get', 'DTV_PW'], // Adjusting line width based on daily traffic volume
+          0,
+          0.5, // Thin lines for lower traffic
+          5000,
+          2,
+          10000,
+          4,
+          20000,
+          6
+        ],
+        'line-opacity': 0.8
+      }
+    })
+
+    map.addSource('roads_swiss_statistics_projection', {
+      type: 'vector',
+      url: 'pmtiles://geodata/roads_swiss_statistics_projection.pmtiles'
+    })
+
+    map.addLayer({
+      id: 'roads_swiss_statistics_projection-layer',
+      type: 'line',
+      source: 'roads_swiss_statistics_projection',
+      'source-layer': 'roads_swiss_statistics_projection',
+      paint: {
+        'line-color': [
+          'interpolate',
+          ['linear'],
+          ['get', 'DWV_PW'], // Using DWV as the base metric for traffic intensity
+          0,
+          '#b0e0e6', // Light color for low traffic
+          5000,
+          '#4682b4', // Moderate traffic
+          10000,
+          '#ff4500', // High traffic
+          20000,
+          '#8b0000' // Very high traffic
+        ],
+        'line-width': [
+          'interpolate',
+          ['linear'],
+          ['get', 'DTV_PW'], // Adjusting line width based on daily traffic volume
+          0,
+          0.5, // Thin lines for lower traffic
+          5000,
+          2,
+          10000,
+          4,
+          20000,
+          6
+        ],
+        'line-opacity': 0.8
+      }
+    })
+    map.addSource('gws_data', {
+      type: 'vector',
+      url: 'pmtiles://geodata/gws_data.pmtiles'
+    })
+
+    map.addLayer({
+      id: 'gws_data-layer',
+      type: 'fill',
+      source: 'gws_data',
+      'source-layer': 'gws_grid_wgs84',
+      paint: {
+        'fill-color': [
+          'interpolate',
+          ['linear'],
+          ['get', 'GTOT'], // Color gradient based on total buildings with residential use
+          0,
+          '#e0f7fa', // Light blue for lower values
+          10,
+          '#4db6ac', // Moderate density of residential buildings
+          25,
+          '#00796b', // Higher density
+          50,
+          '#004d40' // Very high density
+        ]
+      }
+    })
+
+    map.addSource('statpop_data', {
+      type: 'vector',
+      url: 'pmtiles://geodata/statpop_data.pmtiles'
+    })
+
+    map.addLayer({
+      id: 'statpop_data-layer',
+      type: 'fill',
+      source: 'statpop_data',
+      'source-layer': 'statpop_grid_wgs84',
+      paint: {
+        'fill-color': [
+          'interpolate',
+          ['linear'],
+          ['get', 'B22BTOT'], // Color gradient based on total buildings with residential use
+          0,
+          '#e0f7fa', // Light blue for lower values
+          10,
+          '#4db6ac', // Moderate density of residential buildings
+          25,
+          '#00796b', // Higher density
+          50,
+          '#004d40' // Very high density
+        ]
+      }
     })
 
     map.addSource('wrf-data', {
@@ -174,8 +309,14 @@ onMounted(() => {
     map.addSource('buildings', {
       type: 'vector',
       url: 'pmtiles://geodata/buildings_swiss.pmtiles',
-      minzoom: 5,
-      maxzoom: 14
+      minzoom: 5
+    })
+
+    // Add the vector tile source
+    map.addSource('roads', {
+      type: 'vector',
+      url: 'pmtiles://geodata/roads_swiss.pmtiles',
+      minzoom: 5
     })
 
     // Add a layer to visualize the data
@@ -197,6 +338,29 @@ onMounted(() => {
           '#00FF00' // Green for newer buildings (e.g., 2020)
         ],
         'fill-opacity': 0.7 // Adjust the opacity to your preference
+      }
+    })
+
+    map.addLayer({
+      id: 'roads-layer',
+      type: 'line', // or 'line', 'circle', etc., depending on your data
+      source: 'roads',
+      'source-layer': 'roads_swiss', // This should match the layer name inside the MBTiles
+      paint: {
+        'line-color': [
+          'interpolate',
+          ['linear'],
+          ['to-number', ['get', 'OBJORIG_YE']], // Converts the OBJORIG_YE property to a number
+          0,
+          '#00FFFF', // Cyan for unknown year (e.g., 0)
+          1950,
+          '#FF0000', // Red for older buildings (e.g., 1900)
+          2000,
+          '#FFFF00', // Yellow for mid-range buildings (e.g., 2000)
+          2020,
+          '#00FF00' // Green for newer buildings (e.g., 2020)
+        ],
+        'line-opacity': 0.7 // Adjust the opacity to your preference
       }
     })
 
@@ -225,10 +389,7 @@ onMounted(() => {
       if (map) map.getCanvas().classList.remove('hovered-feature')
     })
 
-    map.on('mousemove', 'trajectories', function (e) {})
-    if (props.callbackLoaded !== undefined) {
-      props.callbackLoaded()
-    }
+    if (props.callbackLoaded) props.callbackLoaded()
   })
   loading.value = false
 })
