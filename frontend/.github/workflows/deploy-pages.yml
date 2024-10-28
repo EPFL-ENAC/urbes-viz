@@ -2,7 +2,7 @@ name: Deploy static content to Pages
 
 on:
   push:
-    branches: ["main"]
+    branches: ['main']
 
 permissions:
   contents: read
@@ -10,7 +10,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: "pages"
+  group: 'pages'
   cancel-in-progress: true
 
 jobs:
@@ -21,17 +21,16 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - run: cd frontend
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
-          node-version: "lts/*"
-          cache: "npm"
+          node-version: 'lts/*'
+          cache: 'npm'
       - run: npm ci
       - run: npm run build
       - uses: actions/configure-pages@v3
       - uses: actions/upload-pages-artifact@v1
         with:
-          path: "./frontend/dist" # Adjust the path to the built output in the frontend folder
+          path: './dist' # Adjust the path to the built output
       - id: deployment
         uses: actions/deploy-pages@v1
