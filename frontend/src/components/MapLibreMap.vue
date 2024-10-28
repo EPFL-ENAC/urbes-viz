@@ -93,7 +93,7 @@ const urlSource = computed(() => {
     minimumIntegerDigits: 3,
     useGrouping: false
   })
-  return `/geodata/output_images_${props.variableSelected}/${props.variableSelected}_${id}.png`
+  return `https://enacit4r-cdn.epfl.ch/utnc-viz/output_images_${props.variableSelected}/${props.variableSelected}_${id}.png`
 })
 
 watch(urlSource, (url) => {
@@ -113,6 +113,7 @@ onMounted(() => {
     zoom: props.zoom,
     minZoom: props.minZoom,
     maxZoom: props.maxZoom,
+    pitch: 60, // pitch in degrees
     attributionControl: false
   })
 
@@ -138,7 +139,7 @@ onMounted(() => {
 
     map.addSource('areas', {
       type: 'vector',
-      url: 'pmtiles://geodata/hoheitsgebiet.pmtiles',
+      url: 'pmtiles://https://enacit4r-cdn.epfl.ch/utnc-viz/hoheitsgebiet.pmtiles',
       minzoom: 5,
       maxzoom: 17
     })
@@ -152,7 +153,7 @@ onMounted(() => {
 
     map.addSource('roads_swiss_statistics', {
       type: 'vector',
-      url: 'pmtiles://geodata/roads_swiss_statistics.pmtiles'
+      url: 'pmtiles://https://enacit4r-cdn.epfl.ch/utnc-viz/roads_swiss_statistics.pmtiles'
     })
 
     map.addLayer({
@@ -193,7 +194,7 @@ onMounted(() => {
 
     map.addSource('roads_swiss_statistics_projection', {
       type: 'vector',
-      url: 'pmtiles://geodata/roads_swiss_statistics_projection.pmtiles'
+      url: 'pmtiles://https://enacit4r-cdn.epfl.ch/utnc-viz/roads_swiss_statistics_projection.pmtiles'
     })
 
     map.addLayer({
@@ -233,7 +234,7 @@ onMounted(() => {
     })
     map.addSource('gws_data', {
       type: 'vector',
-      url: 'pmtiles://geodata/gws_data.pmtiles'
+      url: 'pmtiles://https://enacit4r-cdn.epfl.ch/utnc-viz/gws_data.pmtiles'
     })
 
     map.addLayer({
@@ -260,7 +261,7 @@ onMounted(() => {
 
     map.addSource('statpop_data', {
       type: 'vector',
-      url: 'pmtiles://geodata/statpop_data.pmtiles'
+      url: 'pmtiles://https://enacit4r-cdn.epfl.ch/utnc-viz/statpop_data.pmtiles'
     })
 
     map.addLayer({
@@ -308,14 +309,14 @@ onMounted(() => {
     // Add the vector tile source
     map.addSource('buildings', {
       type: 'vector',
-      url: 'pmtiles://geodata/buildings_swiss.pmtiles',
+      url: 'pmtiles://https://enacit4r-cdn.epfl.ch/utnc-viz/buildings_swiss.pmtiles',
       minzoom: 5
     })
 
     // Add the vector tile source
     map.addSource('roads', {
       type: 'vector',
-      url: 'pmtiles://geodata/roads_swiss.pmtiles',
+      url: 'pmtiles://https://enacit4r-cdn.epfl.ch/utnc-viz/roads_swiss.pmtiles',
       minzoom: 5
     })
 
