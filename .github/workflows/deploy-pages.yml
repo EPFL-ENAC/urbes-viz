@@ -28,6 +28,8 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
       - run: npm ci
       - run: npm run build
+        env:
+          BASE_URL: "/utnc-viz/"
       - uses: actions/upload-pages-artifact@v3
         with:
           path: frontend/dist
