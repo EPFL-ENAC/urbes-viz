@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import MapLibreMap from '@/components/MapLibreMap.vue'
-import LayerSelector from '@/components/LayerSelector.vue'
+import { useTheme } from 'vuetify'
+
 import type { Parameters } from '@/utils/jsonWebMap'
-import { computed, onMounted, ref, shallowRef, triggerRef, watch } from 'vue'
+import { computed, ref, shallowRef, watch } from 'vue'
 
 const props = defineProps<{
   styleUrl: string
@@ -53,24 +54,40 @@ watch(
     syncAllLayersVisibility(layersSelected)
   }
 )
+
+const vuetifyTheme = useTheme()
+
+const theme = ref('style/dark.json') // Default theme
+const themes = [
+  { value: 'style/light.json', label: 'Light' },
+  { value: 'style/dark.json', label: 'Dark' },
+  { value: 'style/none.json', label: 'None' }
+]
+
+watch(
+  () => theme.value,
+  (theme) => {
+    vuetifyTheme.global.name.value = theme === 'style/light.json' ? 'light' : 'dark'
+  }
+)
 </script>
 
 <template>
-  <v-container class="fill-height overflow-hidden" fluid>
+  <v-container class="fill-height pa-0 overflow-hidden" fluid>
     <v-row class="fill-height overflow-y-hidden">
       <v-col cols="2" md="2" class="params-col border-e-md overflow-y-auto overflow-x-hidden">
         <v-card flat>
-          <v-card-title> <h2>LAYERS</h2> </v-card-title>
+          <v-card-title class="ml-2"> <h2>LAYERS</h2> </v-card-title>
           <v-card-text class="d-flex flex-column">
             <v-checkbox
               v-for="(item, index) in possibleLayers"
-              class="py-4"
               :key="index"
               v-model="layersSelected"
+              class="py-4"
               hide-details
               :value="item.id"
             >
-              <template v-slot:label>
+              <template #label>
                 <h3>{{ item.label.toUpperCase() }}</h3>
               </template>
             </v-checkbox>
@@ -88,9 +105,10 @@ watch(
       </v-col>
       <v-col id="map-time-input-container" cols="10" md="10" class="py-0 pl-0 d-flex flex-column">
         <MapLibreMap
+          :key="theme"
           ref="map"
           :center="center"
-          :style-spec="styleUrl"
+          :style-spec="theme"
           :popup-layer-ids="parameters.popupLayerIds"
           :zoom="zoom"
           :max-zoom="20"
@@ -100,6 +118,18 @@ watch(
           :callback-loaded="() => syncAllLayersVisibility(layersSelected)"
           class="flex-grow-1"
         />
+        <div class="theme-selector">
+          <v-select
+            v-model="theme"
+            :items="themes"
+            item-value="value"
+            item-title="label"
+            label="Theme"
+            dense
+            hide-details
+            outlined
+          />
+        </div>
 
         <v-card v-if="isWrfSelected" flat class="mt-auto border-t-md pb-4 px-4">
           <v-card-title> Time </v-card-title>
@@ -123,5 +153,12 @@ watch(
 
 .no-min-height {
   height: 32px;
+}
+
+.theme-selector {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  z-index: 1000;
 }
 </style>

@@ -12,7 +12,6 @@ import {
   VectorTileSource,
   type FilterSpecification,
   type LngLatLike,
-  type MapSourceDataEvent,
   type StyleSetterOptions,
   type StyleSpecification,
   addProtocol
@@ -48,6 +47,8 @@ const props = withDefaults(
     minZoom: undefined,
     maxZoom: undefined,
     filterIds: undefined,
+    legendColors: undefined,
+    callbackLoaded: undefined,
     popupLayerIds: () => [],
     areaLayerIds: () => []
   }
@@ -134,7 +135,7 @@ onMounted(() => {
 
   let hoveredStateId: number = -1
 
-  map.once('load', () => {
+  map.on('load', () => {
     // filterLayers(props.filterIds)
     if (!map) return
     hasLoaded.value = true
@@ -380,7 +381,7 @@ onMounted(() => {
       }
     }
 
-    function handleDataEvent(e: MapSourceDataEvent) {
+    function handleDataEvent() {
       if (map?.areTilesLoaded()) {
         loading.value = false
       } else {
@@ -503,7 +504,7 @@ watch(
         closeButton: false,
         closeOnClick: false
       })
-      map?.on('mouseenter', layerId, function (e) {
+      map?.on('mouseenter', layerId, function () {
         if (map) {
           map.getCanvas().style.cursor = 'pointer'
         }
