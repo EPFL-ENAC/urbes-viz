@@ -94,7 +94,8 @@ const urlSource = computed(() => {
     minimumIntegerDigits: 3,
     useGrouping: false
   })
-  return `/geodata/output_images_${props.variableSelected}/${props.variableSelected}_${id}.png`
+  const baseURL = import.meta.env.DEV ? '/geodata/' : 'https://enacit4r-cdn.epfl.ch/utnc-viz'
+  return `/output_images_${props.variableSelected}/${props.variableSelected}_${id}.png`
 })
 
 watch(urlSource, (url) => {
@@ -118,6 +119,7 @@ onMounted(() => {
     center: props.center,
     zoom: props.zoom,
     minZoom: props.minZoom,
+    pitch: 40,
     maxZoom: props.maxZoom,
     attributionControl: false
   })
@@ -272,12 +274,24 @@ onMounted(() => {
 
     map.addLayer({
       id: 'statpop_data-layer',
-      type: 'fill',
+      type: 'fill-extrusion',
       source: 'statpop_data',
       'source-layer': 'statpop_grid_wgs84',
       paint: {
-        'fill-opacity': 0.5,
-        'fill-color': [
+        'fill-extrusion-height': [
+          'interpolate',
+          ['linear'],
+          ['get', 'B22BTOT'], // Color gradient based on total buildings with residential use
+          0,
+          0, // Light blue for lower values
+          10,
+          200, // Moderate density of residential buildings
+          25,
+          400, // Higher density
+          50,
+          600 // Very high density
+        ],
+        'fill-extrusion-color': [
           'interpolate',
           ['linear'],
           ['get', 'B22BTOT'], // Color gradient based on total buildings with residential use
@@ -330,11 +344,22 @@ onMounted(() => {
     // Add a layer to visualize the data
     map.addLayer({
       id: 'buildings-layer',
-      type: 'fill', // or 'line', 'circle', etc., depending on your data
+      type: 'fill-extrusion', // or 'line', 'circle', etc., depending on your data
       source: 'buildings',
       'source-layer': 'buildings_swiss', // This should match the layer name inside the MBTiles
       paint: {
-        'fill-color': [
+        'fill-extrusion-height': [
+          'interpolate',
+          ['linear'],
+          ['to-number', ['get', 'OBJORIG_YE']], // Converts the OBJORIG_YE property to a number
+          1950,
+          10, // Red for older buildings (e.g., 1900)
+          2000,
+          50, // Yellow for mid-range buildings (e.g., 2000)
+          2020,
+          100 // Green for newer buildings (e.g., 2020)
+        ],
+        'fill-extrusion-color': [
           'interpolate',
           ['linear'],
           ['to-number', ['get', 'OBJORIG_YE']], // Converts the OBJORIG_YE property to a number
@@ -345,7 +370,12 @@ onMounted(() => {
           2020,
           '#00FF00' // Green for newer buildings (e.g., 2020)
         ],
-        'fill-opacity': 0.7 // Adjust the opacity to your preference
+        'fill-extrusion-base': [
+          'case',
+          ['>=', ['get', 'zoom'], 16],
+          ['get', 'render_min_height'],
+          0
+        ]
       }
     })
 
