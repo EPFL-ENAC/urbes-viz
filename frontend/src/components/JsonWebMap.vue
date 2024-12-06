@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import MapLibreMap from '@/components/MapLibreMap.vue'
-
+import LayerSelector from '@/components/LayerSelector.vue'
 import type { Parameters } from '@/utils/jsonWebMap'
-import { onMounted, ref, shallowRef, triggerRef, watch } from 'vue'
+import { computed, onMounted, ref, shallowRef, triggerRef, watch } from 'vue'
 
 const props = defineProps<{
   styleUrl: string
@@ -24,20 +24,21 @@ const center = {
 const zoom = 8
 
 const possibleLayers = [
-  'buildings-layer',
-  'wrf-layer',
-  'areas-layer',
-  'roads-layer',
-  'roads_swiss_statistics-layer',
-  'roads_swiss_statistics_projection-layer',
-  'gws_data-layer',
-  'statpop_data-layer'
+  { id: 'buildings-layer', label: 'Buildings Layer' },
+  { id: 'wrf-layer', label: 'Weather Data (WRF)' },
+  { id: 'areas-layer', label: 'Areas Layer' },
+  { id: 'roads-layer', label: 'Roads Layer' },
+  { id: 'roads_swiss_statistics-layer', label: 'Swiss Roads Statistics' },
+  { id: 'roads_swiss_statistics_projection-layer', label: 'Projected Swiss Roads Statistics' },
+  { id: 'gws_data-layer', label: 'GWS Data' },
+  { id: 'statpop_data-layer', label: 'Statistical Population Data' }
 ]
-
 const layersSelected = ref<string[]>(['roads_swiss_statistics-layer'])
 
+const isWrfSelected = computed(() => layersSelected.value.includes('wrf-layer'))
+
 const syncAllLayersVisibility = (layersSelected: string[]) => {
-  for (let layer of possibleLayers) {
+  for (let { id: layer } of possibleLayers) {
     if (layersSelected.includes(layer)) {
       map.value?.setLayerVisibility(layer, true)
     } else {
@@ -55,26 +56,28 @@ watch(
 </script>
 
 <template>
-  <v-container class="fill-height pa-0 overflow-hidden" fluid>
+  <v-container class="fill-height overflow-hidden" fluid>
     <v-row class="fill-height overflow-y-hidden">
-      <v-col cols="2" md="2" class="pl-6 params-col border-e-md overflow-y-auto overflow-x-hidden">
+      <v-col cols="2" md="2" class="params-col border-e-md overflow-y-auto overflow-x-hidden">
         <v-card flat>
-          <v-card-title> Layers </v-card-title>
-          <v-card-text>
+          <v-card-title> <h2>LAYERS</h2> </v-card-title>
+          <v-card-text class="d-flex flex-column">
             <v-checkbox
               v-for="(item, index) in possibleLayers"
+              class="py-4"
               :key="index"
               v-model="layersSelected"
-              density="compact"
-              class="no-min-height"
               hide-details
-              :label="item"
-              :value="item"
-            />
+              :value="item.id"
+            >
+              <template v-slot:label>
+                <h3>{{ item.label.toUpperCase() }}</h3>
+              </template>
+            </v-checkbox>
           </v-card-text>
         </v-card>
-        <v-card flat>
-          <v-card-title> Variables WRF data</v-card-title>
+        <v-card v-if="isWrfSelected" class="mt-10" flat>
+          <v-card-title> <h3>Variables WRF data</h3></v-card-title>
           <v-card-text>
             <v-radio-group v-model="variableSelected" hide-details>
               <v-radio label="U10" value="u10"></v-radio>
@@ -98,7 +101,7 @@ watch(
           class="flex-grow-1"
         />
 
-        <v-card flat class="mt-auto border-t-md pb-4 px-4">
+        <v-card v-if="isWrfSelected" flat class="mt-auto border-t-md pb-4 px-4">
           <v-card-title> Time </v-card-title>
           <v-card-text>
             <v-slider v-model="idxImage" :min="0" :max="41"></v-slider>

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import JsonWebMap from '@/components/JsonWebMap.vue'
 
-const styleUrl = 'style/light.json'
+const styleUrl = 'style/dark.json'
 </script>
 
 <template>

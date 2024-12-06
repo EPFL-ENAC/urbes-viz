@@ -247,6 +247,7 @@ onMounted(() => {
       source: 'gws_data',
       'source-layer': 'gws_grid_wgs84',
       paint: {
+        'fill-opacity': 0.5,
         'fill-color': [
           'interpolate',
           ['linear'],

@@ -1,6 +1,5 @@
 import { createVuetify } from 'vuetify'
 import { aliases, mdi } from 'vuetify/iconsets/mdi-svg'
-import colors from 'vuetify/lib/util/colors'
 import 'vuetify/styles'
 
 export default createVuetify({
@@ -12,11 +11,11 @@ export default createVuetify({
     }
   },
   theme: {
+    defaultTheme: 'dark',
     themes: {
-      light: {
+      dark: {
         colors: {
-          primary: colors.shades.black,
-          secondary: colors.blue.base
+          surface: '#121212'
         }
       }
     }
