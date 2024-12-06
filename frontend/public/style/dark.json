@@ -605,7 +605,7 @@
       "source-layer": "hachure",
       "layout": { "visibility": "visible" },
       "paint": {
-        "fill-color": ["match", ["get", "class"], 1, "rgba(32,32,32, 1)", "hsl(203, 60%, 46%)"],
+        "fill-color": ["match", ["get", "class"], 1, "rgba(32,32,32, 1)", "hsl(203, 2%, 15%)"],
         "fill-opacity": ["interpolate", ["linear"], ["zoom"], 9, 0, 11, 0.2, 14, 0.25],
         "fill-antialias": false
       }
@@ -1044,7 +1044,7 @@
       "layout": { "visibility": "visible" },
       "paint": {
         "line-blur": 0.4,
-        "line-color": "hsl(220, 10%, 67%)",
+        "line-color": "hsl(220, 2%, 7%)",
         "line-width": {
           "stops": [
             [15, 1],
@@ -1073,16 +1073,16 @@
           ["exponential", 1],
           ["zoom"],
           13,
-          ["match", ["get", "class"], "weir", "hsl(220, 10%, 82%)", "hsl(220, 10%, 86%)"],
+          ["match", ["get", "class"], "weir", "hsl(220, 2%, 82%)", "hsl(220, 2%, 86%)"],
           17,
           [
             "match",
             ["get", "class"],
             "weir",
-            "hsl(220, 10%, 75%)",
+            "hsl(220, 2%, 5%)",
             "dam",
-            "hsl(220, 10%, 82%)",
-            "hsl(220, 10%, 86%)"
+            "hsl(220, 2%, 7%)",
+            "hsl(220, 2%, 9%)"
           ]
         ],
         "fill-opacity": [
@@ -2222,8 +2222,8 @@
       "paint": {
         "fill-color": {
           "stops": [
-            [13, "hsl(220, 10%, 82%)"],
-            [17, "hsl(220, 10%, 75%)"]
+            [13, "hsl(220, 2%, 4%)"],
+            [17, "hsl(220, 2%, 8%)"]
           ]
         },
         "fill-opacity": {
@@ -2242,7 +2242,7 @@
       "minzoom": 15.0,
       "layout": { "visibility": "visible" },
       "paint": {
-        "line-color": "hsl(220, 10%, 67%)",
+        "line-color": "hsl(220, 2%, 10%)",
         "line-width": ["interpolate", ["linear"], ["zoom"], 15, 0.2, 18, 1.2],
         "line-opacity": ["interpolate", ["linear"], ["zoom"], 15, 0, 16, 0.5, 19, 1]
       }
