@@ -93,7 +93,7 @@ const urlSource = computed(() => {
     minimumIntegerDigits: 3,
     useGrouping: false
   })
-  return `https://enacit4r-cdn.epfl.ch/utnc-viz/output_images_${props.variableSelected}/${props.variableSelected}_${id}.png`
+  return `/geodata/output_images_${props.variableSelected}/${props.variableSelected}_${id}.png`
 })
 
 watch(urlSource, (url) => {
@@ -105,6 +105,11 @@ watch(urlSource, (url) => {
 addProtocol('pmtiles', protocol.tile)
 
 onMounted(() => {
+  // Find the base url depending on the environment
+  // If dev it should be geodata/
+  // If prod it should be https://enacit4r-cdn.epfl.ch/utnc-viz/
+  const baseUrl = import.meta.env.DEV ? '/geodata' : 'https://enacit4r-cdn.epfl.ch/utnc-viz'
+
   addProtocol('pmtiles', protocol.tile)
   map = new Maplibre({
     container: container.value as HTMLDivElement,
@@ -113,7 +118,6 @@ onMounted(() => {
     zoom: props.zoom,
     minZoom: props.minZoom,
     maxZoom: props.maxZoom,
-    pitch: 60, // pitch in degrees
     attributionControl: false
   })
 
@@ -139,7 +143,7 @@ onMounted(() => {
 
     map.addSource('areas', {
       type: 'vector',
-      url: 'pmtiles://https://enacit4r-cdn.epfl.ch/utnc-viz/hoheitsgebiet.pmtiles',
+      url: `pmtiles://${baseUrl}/hoheitsgebiet.pmtiles`,
       minzoom: 5,
       maxzoom: 17
     })
@@ -153,7 +157,7 @@ onMounted(() => {
 
     map.addSource('roads_swiss_statistics', {
       type: 'vector',
-      url: 'pmtiles://https://enacit4r-cdn.epfl.ch/utnc-viz/roads_swiss_statistics.pmtiles'
+      url: `pmtiles://${baseUrl}/roads_swiss_statistics.pmtiles`
     })
 
     map.addLayer({
@@ -194,7 +198,7 @@ onMounted(() => {
 
     map.addSource('roads_swiss_statistics_projection', {
       type: 'vector',
-      url: 'pmtiles://https://enacit4r-cdn.epfl.ch/utnc-viz/roads_swiss_statistics_projection.pmtiles'
+      url: `pmtiles://${baseUrl}/roads_swiss_statistics_projection.pmtiles`
     })
 
     map.addLayer({
@@ -234,7 +238,7 @@ onMounted(() => {
     })
     map.addSource('gws_data', {
       type: 'vector',
-      url: 'pmtiles://https://enacit4r-cdn.epfl.ch/utnc-viz/gws_data.pmtiles'
+      url: `pmtiles://${baseUrl}/gws_grid.pmtiles`
     })
 
     map.addLayer({
@@ -261,7 +265,7 @@ onMounted(() => {
 
     map.addSource('statpop_data', {
       type: 'vector',
-      url: 'pmtiles://https://enacit4r-cdn.epfl.ch/utnc-viz/statpop_data.pmtiles'
+      url: `pmtiles://${baseUrl}/statpop_grid.pmtiles`
     })
 
     map.addLayer({
@@ -270,6 +274,7 @@ onMounted(() => {
       source: 'statpop_data',
       'source-layer': 'statpop_grid_wgs84',
       paint: {
+        'fill-opacity': 0.5,
         'fill-color': [
           'interpolate',
           ['linear'],
@@ -309,14 +314,14 @@ onMounted(() => {
     // Add the vector tile source
     map.addSource('buildings', {
       type: 'vector',
-      url: 'pmtiles://https://enacit4r-cdn.epfl.ch/utnc-viz/buildings_swiss.pmtiles',
+      url: `pmtiles://${baseUrl}/buildings_swiss.pmtiles`,
       minzoom: 5
     })
 
     // Add the vector tile source
     map.addSource('roads', {
       type: 'vector',
-      url: 'pmtiles://https://enacit4r-cdn.epfl.ch/utnc-viz/roads_swiss.pmtiles',
+      url: `pmtiles://${baseUrl}/roads_swiss.pmtiles`,
       minzoom: 5
     })
 

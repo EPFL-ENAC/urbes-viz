@@ -2,12 +2,10 @@
 import MapLibreMap from '@/components/MapLibreMap.vue'
 
 import type { Parameters } from '@/utils/jsonWebMap'
-import axios from 'axios'
 import { onMounted, ref, shallowRef, triggerRef, watch } from 'vue'
 
 const props = defineProps<{
   styleUrl: string
-  parametersUrl: string
 }>()
 
 const map = ref<InstanceType<typeof MapLibreMap>>()
@@ -17,6 +15,13 @@ const parameters = shallowRef<Parameters>({})
 const variableSelected = ref<string>('t2')
 
 const idxImage = ref<number>(0)
+
+const center = {
+  lat: 46.882,
+  lng: 8.1321
+}
+
+const zoom = 8
 
 const possibleLayers = [
   'buildings-layer',
@@ -46,21 +51,6 @@ watch(
     console.log(layersSelected)
     syncAllLayersVisibility(layersSelected)
   }
-)
-
-watch(
-  () => props.parametersUrl,
-  (parametersUrl) => {
-    axios
-      .get<Parameters>(parametersUrl)
-      .then((response) => response.data)
-      .then((data) => {
-        parameters.value = data
-        triggerRef(parameters)
-        map.value?.update(data.center, data.zoom)
-      })
-  },
-  { immediate: true }
 )
 </script>
 
@@ -96,10 +86,10 @@ watch(
       <v-col id="map-time-input-container" cols="10" md="10" class="py-0 pl-0 d-flex flex-column">
         <MapLibreMap
           ref="map"
-          :center="parameters.center"
+          :center="center"
           :style-spec="styleUrl"
           :popup-layer-ids="parameters.popupLayerIds"
-          :zoom="parameters.zoom"
+          :zoom="zoom"
           :max-zoom="20"
           :min-zoom="6"
           :idx-image="idxImage"
