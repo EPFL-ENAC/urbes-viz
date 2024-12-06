@@ -75,7 +75,7 @@ watch(
 <template>
   <v-container class="fill-height pa-0 overflow-hidden" fluid>
     <v-row class="fill-height overflow-y-hidden">
-      <v-col cols="2" md="2" class="params-col border-e-md overflow-y-auto overflow-x-hidden">
+      <v-col cols="2" class="params-col border-e-md overflow-y-auto overflow-x-hidden">
         <v-card flat>
           <v-card-title class="ml-2"> <h2>LAYERS</h2> </v-card-title>
           <v-card-text class="d-flex flex-column">
@@ -103,7 +103,7 @@ watch(
           </v-card-text>
         </v-card>
       </v-col>
-      <v-col id="map-time-input-container" cols="10" md="10" class="py-0 pl-0 d-flex flex-column">
+      <v-col id="map-time-input-container" cols="10" class="py-0 pl-0 d-flex flex-column">
         <MapLibreMap
           :key="theme"
           ref="map"

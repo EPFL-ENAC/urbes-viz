@@ -42,23 +42,6 @@ Ensure you have the following installed:
 
    The application should be accessible at `http://localhost:5173`.
 
-### Environment Variables
-
-Configure environment variables in the `.env` file located in the `frontend` directory:
-
-```env
-VITE_PARAMETERS_URL=parameters/default.json
-VITE_STYLE_URL=style/heatmap_style.json
-```
-
-### Data Preparation
-
-To add your geospatial data to the application:
-
-1. Use the scripts in the `data_processing` folder to convert data (e.g., shapefiles, CSVs) to PMTiles format.
-2. Upload the resulting PMTiles files to a public server or accessible directory.
-3. Update the `parameters/default.json` file to include the new data source.
-
 ## Project Structure
 
 - **frontend**: Contains the Vue.js application code.
@@ -70,25 +53,7 @@ To add your geospatial data to the application:
   - **public**: Static files, including configuration and style files.
   - `.vscode`: Recommended settings for development.
 
-- **data_processing**: Scripts for preparing datasets.
-
-## Deployment
-
-This project includes a Dockerfile for containerized deployment:
-
-1. Build the Docker image:
-
-   ```bash
-   docker build -t maplibre-vue-app .
-   ```
-
-2. Run the container:
-
-   ```bash
-   docker run -p 8080:80 maplibre-vue-app
-   ```
-
-   The application will be available at `http://localhost:8080`.
+- **data_processing**: Scripts for preparing datasets. For detailed instructions, see [Updating Datasets for the Application](ADD_DATASET.md).
 
 ## Contributing
 
@@ -109,4 +74,3 @@ This project is licensed under the GNU General Public License v3.0. See the LICE
 - [PMTiles](https://github.com/protomaps/PMTiles) for the efficient storage format for geospatial data.
 
 For further questions or support, feel free to contact the repository maintainers.
- 
