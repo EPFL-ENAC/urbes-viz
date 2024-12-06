@@ -94,8 +94,8 @@ const urlSource = computed(() => {
     minimumIntegerDigits: 3,
     useGrouping: false
   })
-  const baseURL = import.meta.env.DEV ? '/geodata/' : 'https://enacit4r-cdn.epfl.ch/utnc-viz'
-  return `/output_images_${props.variableSelected}/${props.variableSelected}_${id}.png`
+  const baseURL = import.meta.env.DEV ? '/geodata' : 'https://enacit4r-cdn.epfl.ch/utnc-viz'
+  return baseURL + `/output_images_${props.variableSelected}/${props.variableSelected}_${id}.png`
 })
 
 watch(urlSource, (url) => {
