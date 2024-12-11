@@ -94,7 +94,7 @@ const urlSource = computed(() => {
     minimumIntegerDigits: 3,
     useGrouping: false
   })
-  const baseURL = import.meta.env.DEV ? '/geodata' : 'https://enacit4r-cdn.epfl.ch/utnc-viz'
+  const baseURL = import.meta.env.DEV ? '/geodata' : 'https://enacit4r-cdn.epfl.ch/urbes-viz'
   return baseURL + `/output_images_${props.variableSelected}/${props.variableSelected}_${id}.png`
 })
 
@@ -109,8 +109,8 @@ addProtocol('pmtiles', protocol.tile)
 onMounted(() => {
   // Find the base url depending on the environment
   // If dev it should be geodata/
-  // If prod it should be https://enacit4r-cdn.epfl.ch/utnc-viz/
-  const baseUrl = import.meta.env.DEV ? '/geodata' : 'https://enacit4r-cdn.epfl.ch/utnc-viz'
+  // If prod it should be https://enacit4r-cdn.epfl.ch/urbes-viz/
+  const baseUrl = import.meta.env.DEV ? '/geodata' : 'https://enacit4r-cdn.epfl.ch/urbes-viz'
 
   addProtocol('pmtiles', protocol.tile)
   map = new Maplibre({
@@ -278,30 +278,18 @@ onMounted(() => {
       source: 'statpop_data',
       'source-layer': 'statpop_grid_wgs84',
       paint: {
-        'fill-extrusion-height': [
-          'interpolate',
-          ['linear'],
-          ['get', 'B22BTOT'], // Color gradient based on total buildings with residential use
-          0,
-          0, // Light blue for lower values
-          10,
-          200, // Moderate density of residential buildings
-          25,
-          400, // Higher density
-          50,
-          600 // Very high density
-        ],
+        'fill-extrusion-height': ['get', 'B22BTOT'], // Color gradient based on total buildings with residential use
         'fill-extrusion-color': [
           'interpolate',
           ['linear'],
           ['get', 'B22BTOT'], // Color gradient based on total buildings with residential use
           0,
           '#e0f7fa', // Light blue for lower values
-          10,
+          30,
           '#4db6ac', // Moderate density of residential buildings
-          25,
+          60,
           '#00796b', // Higher density
-          50,
+          100,
           '#004d40' // Very high density
         ]
       }
