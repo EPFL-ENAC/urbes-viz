@@ -120,7 +120,7 @@ If your dataset has too many dimensions, ensure the GeoJSON is in 2D format befo
 
 1. Once uploaded, the files will be automatically available at the designated URL:
    ```
-   https://enacit4r-cdn.epfl.ch/utnc-viz/(your-file-name)
+   https://enacit4r-cdn.epfl.ch/urbes-viz/(your-file-name)
    ```
 2. No further configuration is needed on the server as the bucket handles availability automatically.
 
@@ -148,7 +148,7 @@ If your dataset has too many dimensions, ensure the GeoJSON is in 2D format befo
    ```javascript
    map.addSource("new-layer", {
      type: "vector",
-     url: "https://enacit4r-cdn.epfl.ch/utnc-viz/(your-file-name)",
+     url: "https://enacit4r-cdn.epfl.ch/urbes-viz/(your-file-name)",
    });
    map.addLayer({
      id: "new-layer",
