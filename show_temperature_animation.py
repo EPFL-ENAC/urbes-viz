@@ -6,7 +6,7 @@ import os
 from matplotlib.animation import FuncAnimation
 
 # Define the directory containing your WRF output files
-data_dir = 'data'
+data_dir = 'data_folder/wrf'
 
 # List of all WRF output files
 wrf_files = sorted([os.path.join(data_dir, f) for f in os.listdir(data_dir) if f.startswith('wrfout_d01')])
@@ -27,7 +27,7 @@ with h5py.File(wrf_files[0], 'r') as hdf_file:
 
 # Set up the plot
 fig, ax = plt.subplots()
-cax = ax.pcolormesh(longitude, latitude, time_series[0], shading='auto', cmap='viridis')
+cax = ax.pcolormesh(longitude, latitude, time_series[0], shading='auto', cmap='plasma')
 fig.colorbar(cax, ax=ax, label='Temperature (K)')
 plt.xlabel('Longitude')
 plt.ylabel('Latitude')
@@ -36,7 +36,7 @@ plt.title('Surface Temperature Evolution')
 # Function to update the plot for each frame
 def update(frame):
     ax.clear()
-    cax = ax.pcolormesh(longitude, latitude, time_series[frame], shading='auto', cmap='viridis')
+    cax = ax.pcolormesh(longitude, latitude, time_series[frame], shading='auto', cmap='plasma')
     plt.xlabel('Longitude')
     plt.ylabel('Latitude')
     plt.title(f'Surface Temperature on {wrf_files[frame].split("_")[-2]}')
