@@ -4,6 +4,8 @@ import { useTheme } from 'vuetify'
 
 import type { Parameters } from '@/utils/jsonWebMap'
 import { computed, ref, shallowRef, watch } from 'vue'
+import InfoTooltip from './InfoTooltip.vue'
+import { VListItemAction } from 'vuetify/lib/components/index.mjs'
 
 const props = defineProps<{
   styleUrl: string
@@ -25,15 +27,48 @@ const center = {
 const zoom = 8
 
 const possibleLayers = [
-  { id: 'buildings-layer', label: 'Buildings Layer' },
-  { id: 'wrf-layer', label: 'Weather Data (WRF)' },
-  { id: 'areas-layer', label: 'Areas Layer' },
-  { id: 'roads-layer', label: 'Roads Layer' },
-  { id: 'roads_swiss_statistics-layer', label: 'Swiss Roads Statistics' },
-  { id: 'roads_swiss_statistics_projection-layer', label: 'Projected Swiss Roads Statistics' },
-  { id: 'gws_data-layer', label: 'GWS Data' },
-  { id: 'statpop_data-layer', label: 'Statistical Population Data' }
+  {
+    id: 'buildings-layer',
+    label: 'Buildings',
+    info: 'Source: Swiss Federal Office of Topography'
+  },
+  {
+    id: 'wrf-layer',
+    label: 'Urban climate',
+    info: 'Source: Aldo Brandi, URBES'
+  },
+  {
+    id: 'areas-layer',
+    label: 'Cantonal boundaries',
+    info: 'Source: Swiss Federal Office of Topography'
+  },
+  {
+    id: 'roads-layer',
+    label: 'Roads',
+    info: 'Source: Swiss Federal Office of Topography'
+  },
+  {
+    id: 'roads_swiss_statistics-layer',
+    label: 'Traffic 2017',
+    info: 'Source: Swiss Federal Office for Spatial Development'
+  },
+  {
+    id: 'roads_swiss_statistics_projection-layer',
+    label: 'Traffic 2050',
+    info: 'Source: Swiss Federal Office for Spatial Development'
+  },
+  {
+    id: 'gws_data-layer',
+    label: 'Building numbers',
+    info: 'Source: Swiss Federal Statistical Office'
+  },
+  {
+    id: 'statpop_data-layer',
+    label: 'Population',
+    info: 'Source: Swiss Federal Statistical Office'
+  }
 ]
+
 const layersSelected = ref<string[]>(['roads_swiss_statistics-layer'])
 
 const isWrfSelected = computed(() => layersSelected.value.includes('wrf-layer'))
@@ -83,23 +118,27 @@ watch(
               v-for="(item, index) in possibleLayers"
               :key="index"
               v-model="layersSelected"
-              class="py-4"
-              hide-details
+              class="py-2"
+              :hide-details="!(isWrfSelected && item.id == 'wrf-layer')"
               :value="item.id"
             >
               <template #label>
-                <h3>{{ item.label.toUpperCase() }}</h3>
+                <h4>{{ item.label.toUpperCase() }}</h4>
+              </template>
+              <template #append>
+                <info-tooltip>{{ item.info }}</info-tooltip>
+              </template>
+              <template v-if="isWrfSelected && item.id == 'wrf-layer'" #details>
+                <v-radio-group
+                  v-if="item.id == 'wrf-layer' && isWrfSelected"
+                  v-model="variableSelected"
+                  hide-details
+                >
+                  <v-radio label="Windspeed" value="u10"></v-radio>
+                  <v-radio label="Temperature" value="t2"></v-radio>
+                </v-radio-group>
               </template>
             </v-checkbox>
-          </v-card-text>
-        </v-card>
-        <v-card v-if="isWrfSelected" class="mt-10" flat>
-          <v-card-title> <h3>Variables WRF data</h3></v-card-title>
-          <v-card-text>
-            <v-radio-group v-model="variableSelected" hide-details>
-              <v-radio label="U10" value="u10"></v-radio>
-              <v-radio label="T2" value="t2"></v-radio>
-            </v-radio-group>
           </v-card-text>
         </v-card>
       </v-col>

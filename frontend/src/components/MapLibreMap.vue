@@ -146,16 +146,19 @@ onMounted(() => {
 
     map.addSource('areas', {
       type: 'vector',
-      url: `pmtiles://${baseUrl}/hoheitsgebiet.pmtiles`,
-      minzoom: 5,
-      maxzoom: 17
+      url: `pmtiles://${baseUrl}/hoheitsgebiet.pmtiles`
     })
 
     map.addLayer({
       id: 'areas-layer',
       type: 'fill', // or 'line', 'circle', etc., depending on your data
       source: 'areas',
-      'source-layer': 'hoheitsgebiet'
+      'source-layer': 'swissBOUNDARIES3D_1_5_TLM_HOHEITSGEBIET_4326',
+      paint: {
+        'fill-color': '#ffffff',
+        'fill-opacity': 0.8,
+        'fill-outline-color': '#000000'
+      }
     })
 
     map.addSource('roads_swiss_statistics', {
@@ -279,6 +282,7 @@ onMounted(() => {
       'source-layer': 'statpop_grid_wgs84',
       paint: {
         'fill-extrusion-height': ['get', 'B22BTOT'], // Color gradient based on total buildings with residential use
+        'fill-extrusion-opacity': 0.8,
         'fill-extrusion-color': [
           'interpolate',
           ['linear'],
@@ -311,7 +315,7 @@ onMounted(() => {
       type: 'raster',
       source: 'wrf-data',
       paint: {
-        'raster-opacity': 0.4
+        'raster-opacity': 0.5
       }
     })
 
