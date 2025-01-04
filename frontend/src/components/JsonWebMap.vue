@@ -4,12 +4,11 @@ import { useTheme } from 'vuetify'
 
 import type { Parameters } from '@/utils/jsonWebMap'
 import { computed, ref, shallowRef, watch } from 'vue'
-import InfoTooltip from './InfoTooltip.vue'
-import { VListItemAction } from 'vuetify/lib/components/index.mjs'
-
-const props = defineProps<{
-  styleUrl: string
-}>()
+import CustomSlider from '@/components/CustomSlider.vue'
+import InfoTooltip from '@/components/InfoTooltip.vue'
+// const props = defineProps<{
+//   styleUrl: string
+// }>()
 
 const map = ref<InstanceType<typeof MapLibreMap>>()
 
@@ -156,7 +155,8 @@ watch(
           :variable-selected="variableSelected"
           :callback-loaded="() => syncAllLayersVisibility(layersSelected)"
           class="flex-grow-1"
-        />
+        >
+        </MapLibreMap>
         <div class="theme-selector">
           <v-select
             v-model="theme"
@@ -169,11 +169,10 @@ watch(
             outlined
           />
         </div>
-
         <v-card v-if="isWrfSelected" flat class="mt-auto border-t-md pb-4 px-4">
           <v-card-title> Time </v-card-title>
           <v-card-text>
-            <v-slider v-model="idxImage" :min="0" :max="41"></v-slider>
+            <custom-slider v-model="idxImage"> </custom-slider>
           </v-card-text>
         </v-card>
       </v-col>
@@ -196,8 +195,8 @@ watch(
 
 .theme-selector {
   position: absolute;
-  bottom: 16px;
-  right: 16px;
+  top: 12px;
+  right: 56px;
   z-index: 1000;
 }
 </style>
