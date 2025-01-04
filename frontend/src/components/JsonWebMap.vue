@@ -6,6 +6,8 @@ import type { Parameters } from '@/utils/jsonWebMap'
 import { computed, ref, shallowRef, watch } from 'vue'
 import CustomSlider from '@/components/CustomSlider.vue'
 import InfoTooltip from '@/components/InfoTooltip.vue'
+
+import { mapConfig } from '@/config/mapConfig'
 // const props = defineProps<{
 //   styleUrl: string
 // }>()
@@ -25,48 +27,11 @@ const center = {
 
 const zoom = 8
 
-const possibleLayers = [
-  {
-    id: 'buildings-layer',
-    label: 'Buildings',
-    info: 'Source: Swiss Federal Office of Topography'
-  },
-  {
-    id: 'wrf-layer',
-    label: 'Urban climate',
-    info: 'Source: Aldo Brandi, URBES'
-  },
-  {
-    id: 'areas-layer',
-    label: 'Cantonal boundaries',
-    info: 'Source: Swiss Federal Office of Topography'
-  },
-  {
-    id: 'roads-layer',
-    label: 'Roads',
-    info: 'Source: Swiss Federal Office of Topography'
-  },
-  {
-    id: 'roads_swiss_statistics-layer',
-    label: 'Traffic 2017',
-    info: 'Source: Swiss Federal Office for Spatial Development'
-  },
-  {
-    id: 'roads_swiss_statistics_projection-layer',
-    label: 'Traffic 2050',
-    info: 'Source: Swiss Federal Office for Spatial Development'
-  },
-  {
-    id: 'gws_data-layer',
-    label: 'Building numbers',
-    info: 'Source: Swiss Federal Statistical Office'
-  },
-  {
-    id: 'statpop_data-layer',
-    label: 'Population',
-    info: 'Source: Swiss Federal Statistical Office'
-  }
-]
+const possibleLayers = mapConfig.layers.map((d) => ({
+  id: d.layer.id,
+  label: d.label,
+  info: d.info
+}))
 
 const layersSelected = ref<string[]>(['roads_swiss_statistics-layer'])
 

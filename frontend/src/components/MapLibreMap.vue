@@ -3,6 +3,8 @@ import 'maplibre-gl/dist/maplibre-gl.css'
 import LoadingCircle from '@/components/LoadingCircle.vue'
 import LegendMap from '@/components/LegendMap.vue'
 
+import { mapConfig } from '@/config/mapConfig'
+
 import {
   FullscreenControl,
   Map as Maplibre,
@@ -17,9 +19,14 @@ import {
   addProtocol
 } from 'maplibre-gl'
 import type { LegendColor } from '@/utils/legendColor'
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
 
 import { Protocol } from 'pmtiles'
+
+// Find the base url depending on the environment
+// If dev it should be geodata/
+// If prod it should be https://enacit4r-cdn.epfl.ch/urbes-viz/
+const baseURL = import.meta.env.DEV ? mapConfig.baseUrl.dev : mapConfig.baseUrl.prod
 
 const props = withDefaults(
   defineProps<{
@@ -60,58 +67,27 @@ let map: Maplibre | undefined = undefined
 const hasLoaded = ref(false)
 const protocol = new Protocol()
 
-const popup = ref<Popup>(
-  new Popup({
-    closeButton: false,
-    maxWidth: '800px'
-  })
-)
-
-function displaySegmentTime(t0: number, t1: number) {
-  // Start time of the recording
-  const startTime = new Date('2018-10-24T08:30:00')
-
-  // Calculate the midpoint in milliseconds
-  const timestamp = (t0 + t1) / 2
-
-  // Create a new date by adding the midpoint to the start time
-  const segmentTime = new Date(startTime.getTime() + timestamp)
-
-  // Format the time as hours:minutes
-  let hours = segmentTime.getHours()
-  let minutes = segmentTime.getMinutes()
-
-  // Ensuring two-digit minutes format
-  const displayMinutes = minutes < 10 ? '0' + minutes : minutes
-
-  // Return the formatted time
-  return `${hours}:${displayMinutes}`
-}
-
 const urlSource = computed(() => {
   const idx = ~~props.idxImage
   const id = idx.toLocaleString('en-US', {
     minimumIntegerDigits: 3,
     useGrouping: false
   })
-  const baseURL = import.meta.env.DEV ? '/geodata' : 'https://enacit4r-cdn.epfl.ch/urbes-viz'
   return baseURL + `/output_images_${props.variableSelected}/${props.variableSelected}_${id}.png`
 })
 
-watch(urlSource, (url) => {
+const updateWrfUrlSource = (url: string) => {
   if (map) {
-    const source = map.getSource('wrf-data') as maplibregl.ImageSource
+    const source = map.getSource('wrf') as maplibregl.ImageSource
     source.updateImage({ url: url })
   }
-})
+}
+
+watch(urlSource, updateWrfUrlSource)
+
 addProtocol('pmtiles', protocol.tile)
 
 onMounted(() => {
-  // Find the base url depending on the environment
-  // If dev it should be geodata/
-  // If prod it should be https://enacit4r-cdn.epfl.ch/urbes-viz/
-  const baseUrl = import.meta.env.DEV ? '/geodata' : 'https://enacit4r-cdn.epfl.ch/urbes-viz'
-
   addProtocol('pmtiles', protocol.tile)
   map = new Maplibre({
     container: container.value as HTMLDivElement,
@@ -133,10 +109,6 @@ onMounted(() => {
     })
   )
 
-  // filterLayers(props.filterIds)
-
-  let hoveredStateId: number = -1
-
   map.on('load', () => {
     // filterLayers(props.filterIds)
     if (!map) return
@@ -144,255 +116,13 @@ onMounted(() => {
     loading.value = false
     map.resize()
 
-    map.addSource('areas', {
-      type: 'vector',
-      url: `pmtiles://${baseUrl}/hoheitsgebiet.pmtiles`
+    // Add all sources dynamically
+    Object.entries(mapConfig.layers).forEach(([str, { id, source, layer }]) => {
+      console.log(str, id, source, layer)
+      map?.addSource(id, source)
+      map?.addLayer(layer)
     })
-
-    map.addLayer({
-      id: 'areas-layer',
-      type: 'fill', // or 'line', 'circle', etc., depending on your data
-      source: 'areas',
-      'source-layer': 'swissBOUNDARIES3D_1_5_TLM_HOHEITSGEBIET_4326',
-      paint: {
-        'fill-color': '#ffffff',
-        'fill-opacity': 0.8,
-        'fill-outline-color': '#000000'
-      }
-    })
-
-    map.addSource('roads_swiss_statistics', {
-      type: 'vector',
-      url: `pmtiles://${baseUrl}/roads_swiss_statistics.pmtiles`
-    })
-
-    map.addLayer({
-      id: 'roads_swiss_statistics-layer',
-      type: 'line',
-      source: 'roads_swiss_statistics',
-      'source-layer': 'roads_swiss_statistics',
-      paint: {
-        'line-color': [
-          'interpolate',
-          ['linear'],
-          ['get', 'DWV_PW'], // Using DWV as the base metric for traffic intensity
-          0,
-          '#b0e0e6', // Light color for low traffic
-          5000,
-          '#4682b4', // Moderate traffic
-          10000,
-          '#ff4500', // High traffic
-          20000,
-          '#8b0000' // Very high traffic
-        ],
-        'line-width': [
-          'interpolate',
-          ['linear'],
-          ['get', 'DTV_PW'], // Adjusting line width based on daily traffic volume
-          0,
-          0.5, // Thin lines for lower traffic
-          5000,
-          2,
-          10000,
-          4,
-          20000,
-          6
-        ],
-        'line-opacity': 0.8
-      }
-    })
-
-    map.addSource('roads_swiss_statistics_projection', {
-      type: 'vector',
-      url: `pmtiles://${baseUrl}/roads_swiss_statistics_projection.pmtiles`
-    })
-
-    map.addLayer({
-      id: 'roads_swiss_statistics_projection-layer',
-      type: 'line',
-      source: 'roads_swiss_statistics_projection',
-      'source-layer': 'roads_swiss_statistics_projection',
-      paint: {
-        'line-color': [
-          'interpolate',
-          ['linear'],
-          ['get', 'DWV_PW'], // Using DWV as the base metric for traffic intensity
-          0,
-          '#b0e0e6', // Light color for low traffic
-          5000,
-          '#4682b4', // Moderate traffic
-          10000,
-          '#ff4500', // High traffic
-          20000,
-          '#8b0000' // Very high traffic
-        ],
-        'line-width': [
-          'interpolate',
-          ['linear'],
-          ['get', 'DTV_PW'], // Adjusting line width based on daily traffic volume
-          0,
-          0.5, // Thin lines for lower traffic
-          5000,
-          2,
-          10000,
-          4,
-          20000,
-          6
-        ],
-        'line-opacity': 0.8
-      }
-    })
-    map.addSource('gws_data', {
-      type: 'vector',
-      url: `pmtiles://${baseUrl}/gws_grid.pmtiles`
-    })
-
-    map.addLayer({
-      id: 'gws_data-layer',
-      type: 'fill',
-      source: 'gws_data',
-      'source-layer': 'gws_grid_wgs84',
-      paint: {
-        'fill-opacity': 0.5,
-        'fill-color': [
-          'interpolate',
-          ['linear'],
-          ['get', 'GTOT'], // Color gradient based on total buildings with residential use
-          0,
-          '#e0f7fa', // Light blue for lower values
-          10,
-          '#4db6ac', // Moderate density of residential buildings
-          25,
-          '#00796b', // Higher density
-          50,
-          '#004d40' // Very high density
-        ]
-      }
-    })
-
-    map.addSource('statpop_data', {
-      type: 'vector',
-      url: `pmtiles://${baseUrl}/statpop_grid.pmtiles`
-    })
-
-    map.addLayer({
-      id: 'statpop_data-layer',
-      type: 'fill-extrusion',
-      source: 'statpop_data',
-      'source-layer': 'statpop_grid_wgs84',
-      paint: {
-        'fill-extrusion-height': ['get', 'B22BTOT'], // Color gradient based on total buildings with residential use
-        'fill-extrusion-opacity': 0.8,
-        'fill-extrusion-color': [
-          'interpolate',
-          ['linear'],
-          ['get', 'B22BTOT'], // Color gradient based on total buildings with residential use
-          0,
-          '#e0f7fa', // Light blue for lower values
-          30,
-          '#4db6ac', // Moderate density of residential buildings
-          60,
-          '#00796b', // Higher density
-          100,
-          '#004d40' // Very high density
-        ]
-      }
-    })
-
-    map.addSource('wrf-data', {
-      type: 'image',
-      url: urlSource.value,
-      coordinates: [
-        [5.13211, 47.94587], // Top-left corner
-        [11.12701, 47.94587], // Top-right corner
-        [11.12701, 45.42068], // Bottom-right corner
-        [5.13211, 45.42068] // Bottom-left corner
-      ]
-    })
-
-    map.addLayer({
-      id: 'wrf-layer',
-      type: 'raster',
-      source: 'wrf-data',
-      paint: {
-        'raster-opacity': 0.5
-      }
-    })
-
-    // Add the vector tile source
-    map.addSource('buildings', {
-      type: 'vector',
-      url: `pmtiles://${baseUrl}/buildings_swiss.pmtiles`,
-      minzoom: 5
-    })
-
-    // Add the vector tile source
-    map.addSource('roads', {
-      type: 'vector',
-      url: `pmtiles://${baseUrl}/roads_swiss.pmtiles`,
-      minzoom: 5
-    })
-
-    // Add a layer to visualize the data
-    map.addLayer({
-      id: 'buildings-layer',
-      type: 'fill-extrusion', // or 'line', 'circle', etc., depending on your data
-      source: 'buildings',
-      'source-layer': 'buildings_swiss', // This should match the layer name inside the MBTiles
-      paint: {
-        'fill-extrusion-height': [
-          'interpolate',
-          ['linear'],
-          ['to-number', ['get', 'OBJORIG_YE']], // Converts the OBJORIG_YE property to a number
-          1950,
-          10, // Red for older buildings (e.g., 1900)
-          2000,
-          50, // Yellow for mid-range buildings (e.g., 2000)
-          2020,
-          100 // Green for newer buildings (e.g., 2020)
-        ],
-        'fill-extrusion-color': [
-          'interpolate',
-          ['linear'],
-          ['to-number', ['get', 'OBJORIG_YE']], // Converts the OBJORIG_YE property to a number
-          1950,
-          '#FF0000', // Red for older buildings (e.g., 1900)
-          2000,
-          '#FFFF00', // Yellow for mid-range buildings (e.g., 2000)
-          2020,
-          '#00FF00' // Green for newer buildings (e.g., 2020)
-        ],
-        'fill-extrusion-base': [
-          'case',
-          ['>=', ['get', 'zoom'], 16],
-          ['get', 'render_min_height'],
-          0
-        ]
-      }
-    })
-
-    map.addLayer({
-      id: 'roads-layer',
-      type: 'line', // or 'line', 'circle', etc., depending on your data
-      source: 'roads',
-      'source-layer': 'roads_swiss', // This should match the layer name inside the MBTiles
-      paint: {
-        'line-color': [
-          'interpolate',
-          ['linear'],
-          ['to-number', ['get', 'OBJORIG_YE']], // Converts the OBJORIG_YE property to a number
-          0,
-          '#00FFFF', // Cyan for unknown year (e.g., 0)
-          1950,
-          '#FF0000', // Red for older buildings (e.g., 1900)
-          2000,
-          '#FFFF00', // Yellow for mid-range buildings (e.g., 2000)
-          2020,
-          '#00FF00' // Green for newer buildings (e.g., 2020)
-        ],
-        'line-opacity': 0.7 // Adjust the opacity to your preference
-      }
-    })
+    updateWrfUrlSource(urlSource.value)
 
     function testTilesLoaded() {
       if (map?.areTilesLoaded()) {
@@ -431,10 +161,8 @@ const throttle = (callback: () => void, id: string, time: number) => {
     // If currently throttled, exit the function
     return
   }
-
   // Set the throttle flag
   throttleTimer.set(id, true)
-
   // Clear the throttle flag after the specified time
   setTimeout(() => {
     throttleTimer.set(id, false)
