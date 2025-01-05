@@ -9,21 +9,28 @@
         @click="show = !show"
       ></v-btn>
     </h4>
-    <div v-if="show" class="my-2">
-      <!-- Categorical Color Display -->
-      <div v-if="!isContinuous">
-        <div v-for="item in colors" :key="item.label" class="legend-item">
-          <div class="color-box" :style="{ backgroundColor: item.color }"></div>
-          <div class="label text-body-2">{{ item.label }}</div>
+    <div v-if="show" class="my-2 d-flex d-row">
+      <div
+        v-for="layer in generatedLayersWithColors"
+        :key="layer?.id"
+        class="layer-legend d-flex flex-column justify-space-between"
+      >
+        <h5>{{ layer.label }} ({{ layer.unit }})</h5>
+        <!-- Categorical Color Display -->
+        <div v-if="layer?.isCategorical">
+          <div v-for="item in layer.colors" :key="item.label" class="legend-item">
+            <div class="color-box" :style="{ backgroundColor: item.color }"></div>
+            <div class="label text-body-2">{{ item.label }}</div>
+          </div>
         </div>
-      </div>
-      <!-- Continuous Color Ramp -->
-      <div v-else class="gradient-ramp">
-        <div class="color-ramp"></div>
-        <div class="ramp-labels">
-          <span>{{ colors[0].label }}</span>
-          <span>{{ colors[~~((colors.length - 1) / 2)].label }}</span>
-          <span>{{ colors[colors.length - 1].label }}</span>
+        <!-- Continuous Color Ramp -->
+        <div v-else class="gradient-ramp">
+          <div class="color-ramp" :style="{ background: layer.gradient }"></div>
+          <div class="ramp-labels">
+            <span>{{ layer.colors[0].label }}</span>
+            <span>{{ layer.colors[~~((layer.colors.length - 1) / 2)].label }}</span>
+            <span>{{ layer.colors[layer.colors.length - 1].label }}</span>
+          </div>
         </div>
       </div>
     </div>
@@ -33,32 +40,95 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { mdiChevronUp, mdiChevronDown } from '@mdi/js'
-import type { LegendColor } from '@/utils/legendColor'
-const props = defineProps<{
-  colors: LegendColor[]
-  reverse?: boolean
-  isContinuous?: boolean
-}>()
-const show = ref(true)
+import { MapLayerConfig } from '@/config/mapConfig'
+import { LayerSpecification } from 'maplibre-gl'
 
-const colors = computed(() => (props.reverse ? [...props.colors].reverse() : props.colors))
-const gradientCSS = computed(() => {
-  return `linear-gradient(to bottom, ${props.colors.map((c) => c.color).join(', ')})`
+type LegendColor = {
+  color: string
+  label: string
+}
+
+const props = defineProps<{
+  layers: MapLayerConfig[]
+}>()
+
+/**
+ * Generate legend colors for a given layer's paint property.
+ * @param layer The MapLibre layer specification.
+ * @returns An array of LegendColor or null if no color stops are found.
+ */
+const generateLegendColors = (layer: LayerSpecification): LegendColor[] | null => {
+  if (layer.paint) {
+    // Handle fill-extrusion, line-color, or other paint properties
+    const paint = layer.paint as any
+    const paintProperty =
+      paint['fill-color'] || paint['line-color'] || paint['fill-extrusion-color'] || null
+
+    if (
+      paintProperty &&
+      Array.isArray(paintProperty) &&
+      paintProperty[0] === 'interpolate' &&
+      paintProperty.length > 3
+    ) {
+      const stops = paintProperty.slice(3) // Skip 'interpolate', 'linear', and the base property
+      const legendColors: LegendColor[] = []
+
+      for (let i = 0; i < stops.length; i += 2) {
+        legendColors.push({ color: stops[i + 1] as string, label: stops[i].toString() })
+      }
+
+      return legendColors
+    }
+  }
+
+  return null
+}
+
+const generatedLayersWithColors = computed(() => {
+  return props.layers
+    .map((layer) => {
+      const colors = generateLegendColors(layer.layer) || []
+      const paint = layer.layer.paint as any
+      const paintProperty =
+        paint['fill-color'] || paint['line-color'] || paint['fill-extrusion-color'] || null
+
+      const isCategorical = paintProperty ? paintProperty[0] !== 'interpolate' : false
+
+      return {
+        ...layer,
+        colors,
+        isCategorical,
+        gradient: `linear-gradient(to bottom, ${colors.map((c) => c.color).join(', ')})`
+      }
+    })
+    .filter((layer) => layer.colors && layer.colors.length > 0)
 })
+
+const show = ref(true)
 </script>
 <style scoped>
 .legend {
   position: absolute;
-  bottom: 1em;
-  background-color: white;
+  bottom: 0.5em;
+  background-color: rgb(var(--v-theme-surface));
   padding: 0.6em 1.4em;
   border-radius: 0.3em;
   z-index: 1000;
-  right: 2em;
+  right: 0.5em;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  color: rgba(var(--v-theme-primary), var(--v-medium-emphasis-opacity));
+  align-items: flex-end;
+  color: rgba(var(--v-theme-on-surface), var(--v-medium-emphasis-opacity));
+}
+
+.layer-legend {
+  margin-bottom: 1em;
+  margin-left: 2em;
+}
+
+.layer-legend h5 {
+  margin-bottom: 0.5em;
+  max-width: 100px;
 }
 
 .legend-item {
@@ -89,7 +159,6 @@ const gradientCSS = computed(() => {
 .color-ramp {
   width: 40px; /* Fixed width for the color ramp */
   height: 100%;
-  background: v-bind('gradientCSS');
 }
 
 .ramp-labels {

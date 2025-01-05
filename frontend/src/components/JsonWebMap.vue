@@ -6,7 +6,7 @@ import type { Parameters } from '@/utils/jsonWebMap'
 import { computed, ref, shallowRef, watch } from 'vue'
 import CustomSlider from '@/components/CustomSlider.vue'
 import InfoTooltip from '@/components/InfoTooltip.vue'
-
+import LegendMap from '@/components/LegendMap.vue'
 import { mapConfig } from '@/config/mapConfig'
 // const props = defineProps<{
 //   styleUrl: string
@@ -35,6 +35,10 @@ const possibleLayers = mapConfig.layers.map((d) => ({
 
 const layersSelected = ref<string[]>(['roads_swiss_statistics-layer'])
 
+const layersVisible = computed(() => {
+  return mapConfig.layers.filter((layer) => layersSelected.value.includes(layer.layer.id) ?? false)
+})
+
 const isWrfSelected = computed(() => layersSelected.value.includes('wrf-layer'))
 
 const syncAllLayersVisibility = (layersSelected: string[]) => {
@@ -49,7 +53,6 @@ const syncAllLayersVisibility = (layersSelected: string[]) => {
 watch(
   () => layersSelected.value,
   (layersSelected) => {
-    console.log(layersSelected)
     syncAllLayersVisibility(layersSelected)
   }
 )
@@ -121,6 +124,9 @@ watch(
           :callback-loaded="() => syncAllLayersVisibility(layersSelected)"
           class="flex-grow-1"
         >
+          <template #legend>
+            <legend-map :layers="layersVisible" :is-continuous="true"></legend-map>
+          </template>
         </MapLibreMap>
         <div class="theme-selector">
           <v-select

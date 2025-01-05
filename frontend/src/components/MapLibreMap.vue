@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import 'maplibre-gl/dist/maplibre-gl.css'
 import LoadingCircle from '@/components/LoadingCircle.vue'
-import LegendMap from '@/components/LegendMap.vue'
 
 import { mapConfig } from '@/config/mapConfig'
 
@@ -19,7 +18,7 @@ import {
   addProtocol
 } from 'maplibre-gl'
 import type { LegendColor } from '@/utils/legendColor'
-import { computed, onMounted, reactive, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 
 import { Protocol } from 'pmtiles'
 
@@ -42,7 +41,6 @@ const props = withDefaults(
     idxImage?: number
     variableSelected?: string
     legendColors?: LegendColor[]
-    continuousColor?: boolean
     callbackLoaded?: () => void
   }>(),
   {
@@ -117,8 +115,7 @@ onMounted(() => {
     map.resize()
 
     // Add all sources dynamically
-    Object.entries(mapConfig.layers).forEach(([str, { id, source, layer }]) => {
-      console.log(str, id, source, layer)
+    Object.entries(mapConfig.layers).forEach(([, { id, source, layer }]) => {
       map?.addSource(id, source)
       map?.addLayer(layer)
     })
@@ -308,11 +305,7 @@ function filterLayers(filterIds?: string[]) {
     <div ref="container" class="map fill-height">
       <loading-circle :loading="loading" />
     </div>
-    <legend-map
-      v-if="legendColors"
-      :colors="legendColors"
-      :is-continuous="continuousColor"
-    ></legend-map>
+    <slot name="legend"></slot>
   </v-container>
 </template>
 

@@ -8,6 +8,7 @@ import {
 export interface MapLayerConfig {
   id: string
   label: string
+  unit: string
   info: string
   source: SourceSpecification
   layer: LayerSpecification
@@ -27,6 +28,7 @@ export const mapConfig = {
     {
       id: 'buildings',
       label: 'Buildings',
+      unit: 'year',
       info: 'Source: Swiss Federal Office of Topography',
       source: {
         type: 'vector',
@@ -73,6 +75,7 @@ export const mapConfig = {
     {
       id: 'wrf',
       label: 'Urban climate',
+      unit: '',
       info: 'Source: Aldo Brandi, URBES',
       source: {
         type: 'image',
@@ -95,6 +98,7 @@ export const mapConfig = {
     },
     {
       id: 'areas',
+      unit: '',
       label: 'Cantonal boundaries',
       info: 'Source: Swiss Federal Office of Topography',
       source: {
@@ -116,6 +120,7 @@ export const mapConfig = {
     {
       id: 'roads',
       label: 'Roads',
+      unit: 'year',
       info: 'Source: Swiss Federal Office of Topography',
       source: {
         type: 'vector',
@@ -148,6 +153,7 @@ export const mapConfig = {
     {
       id: 'roads_swiss_statistics',
       label: 'Traffic 2017',
+      unit: 'vehicles/day',
       info: 'Source: Swiss Federal Office for Spatial Development',
       source: {
         type: 'vector',
@@ -192,6 +198,7 @@ export const mapConfig = {
     {
       id: 'roads_swiss_statistics_projection',
       label: 'Traffic 2050',
+      unit: 'vehicles/day',
       info: 'Source: Swiss Federal Office for Spatial Development',
       source: {
         type: 'vector',
@@ -236,6 +243,7 @@ export const mapConfig = {
     {
       id: 'gws_data',
       label: 'Building numbers',
+      unit: '/100m²',
       info: 'Source: Swiss Federal Statistical Office',
       source: {
         type: 'vector',
@@ -267,6 +275,7 @@ export const mapConfig = {
     {
       id: 'statpop_data',
       label: 'Population',
+      unit: '/100m²',
       info: 'Source: Swiss Federal Statistical Office',
       source: {
         type: 'vector',
