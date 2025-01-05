@@ -10,7 +10,7 @@
 </template>
 
 <script setup lang="ts">
-import noUiSlider from 'nouislider'
+import noUiSlider, { PipsMode } from 'nouislider'
 import 'nouislider/dist/nouislider.css'
 
 import { defineModel, onUnmounted, onMounted, ref } from 'vue'
@@ -129,7 +129,7 @@ const createSlider = () => {
     },
     step: 1,
     pips: {
-      mode: 'steps',
+      mode: PipsMode.Steps,
       filter: (value: number) => {
         return value % 5 === 0 ? 1 : 0
       },
