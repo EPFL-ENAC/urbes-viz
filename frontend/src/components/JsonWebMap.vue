@@ -125,7 +125,11 @@ watch(
           class="flex-grow-1"
         >
           <template #legend>
-            <legend-map :layers="layersVisible" :is-continuous="true"></legend-map>
+            <legend-map
+              :layers="layersVisible"
+              :variable-selected="variableSelected"
+              :is-continuous="true"
+            ></legend-map>
           </template>
         </MapLibreMap>
         <div class="theme-selector">

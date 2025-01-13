@@ -15,7 +15,7 @@
         :key="layer?.id"
         class="layer-legend d-flex flex-column justify-space-between"
       >
-        <h5>{{ layer.label }} ({{ layer.unit }})</h5>
+        <h5>{{ layer.label }} {{ layer.unit ? '(' + layer.unit + ')' : '' }}</h5>
         <!-- Categorical Color Display -->
         <div v-if="layer?.isCategorical">
           <div v-for="item in layer.colors" :key="item.label" class="legend-item">
@@ -50,6 +50,7 @@ type LegendColor = {
 
 const props = defineProps<{
   layers: MapLayerConfig[]
+  variableSelected: string
 }>()
 
 /**
@@ -84,23 +85,71 @@ const generateLegendColors = (layer: LayerSpecification): LegendColor[] | null =
   return null
 }
 
+const generateOneLayerWithColors = (layer: MapLayerConfig) => {
+  console.log(layer)
+  if (layer.id === 'wrf') {
+    let colors: { color: string; label: string }[] = []
+    if (props.variableSelected == 't2') {
+      // Color scale for "t2" variable: ["#0d0887","#41049d","#6a00a8","#8f0da4","#b12a90","#cc4778","#e16462","#f2844b","#fca636","#fcce25","#f0f921"]
+      // Range: 272 K to 292 K
+      colors = [
+        { color: '#0d0887', label: '272 K' },
+        { color: '#41049d', label: '274 K' },
+        { color: '#6a00a8', label: '276 K' },
+        { color: '#8f0da4', label: '278 K' },
+        { color: '#b12a90', label: '280 K' },
+        { color: '#cc4778', label: '282 K' },
+        { color: '#e16462', label: '284 K' },
+        { color: '#f2844b', label: '286 K' },
+        { color: '#fca636', label: '288 K' },
+        { color: '#fcce25', label: '290 K' },
+        { color: '#f0f921', label: '292 K' }
+      ]
+    } else if (props.variableSelected == 'u10') {
+      // Color scale for "u10" variable: ["#440154","#482475","#414487","#355f8d","#2a788e","#21918c","#22a884","#44bf70","#7ad151","#bddf26","#fde725"]
+      // Range: -2 m/s to 3 m/s
+      colors = [
+        { color: '#440154', label: '-2 m/s' },
+        { color: '#482475', label: '-1.5 m/s' },
+        { color: '#414487', label: '-1 m/s' },
+        { color: '#355f8d', label: '-0.5 m/s' },
+        { color: '#2a788e', label: '0 m/s' },
+        { color: '#21918c', label: '0.5 m/s' },
+        { color: '#22a884', label: '1 m/s' },
+        { color: '#44bf70', label: '1.5 m/s' },
+        { color: '#7ad151', label: '2 m/s' },
+        { color: '#bddf26', label: '2.5 m/s' },
+        { color: '#fde725', label: '3 m/s' }
+      ]
+    } else {
+      colors = []
+    }
+    return {
+      ...layer,
+      colors,
+      isCategorical: false,
+      gradient: `linear-gradient(to bottom, ${colors.map((c) => c.color).join(', ')})`
+    }
+  }
+
+  const colors = generateLegendColors(layer.layer) || []
+  const paint = layer.layer.paint as any
+  const paintProperty =
+    paint['fill-color'] || paint['line-color'] || paint['fill-extrusion-color'] || null
+
+  const isCategorical = paintProperty ? paintProperty[0] !== 'interpolate' : false
+
+  return {
+    ...layer,
+    colors,
+    isCategorical,
+    gradient: `linear-gradient(to bottom, ${colors.map((c) => c.color).join(', ')})`
+  }
+}
+
 const generatedLayersWithColors = computed(() => {
   return props.layers
-    .map((layer) => {
-      const colors = generateLegendColors(layer.layer) || []
-      const paint = layer.layer.paint as any
-      const paintProperty =
-        paint['fill-color'] || paint['line-color'] || paint['fill-extrusion-color'] || null
-
-      const isCategorical = paintProperty ? paintProperty[0] !== 'interpolate' : false
-
-      return {
-        ...layer,
-        colors,
-        isCategorical,
-        gradient: `linear-gradient(to bottom, ${colors.map((c) => c.color).join(', ')})`
-      }
-    })
+    .map((layer: MapLayerConfig) => generateOneLayerWithColors(layer))
     .filter((layer) => layer.colors && layer.colors.length > 0)
 })
 
