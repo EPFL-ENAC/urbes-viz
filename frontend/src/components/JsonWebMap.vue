@@ -16,7 +16,7 @@ const map = ref<InstanceType<typeof MapLibreMap>>()
 
 const parameters = shallowRef<Parameters>({})
 
-const variableSelected = ref<string>('t2')
+const variableSelected = ref<string>('u10')
 
 const idxImage = ref<number>(0)
 
