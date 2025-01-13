@@ -80,7 +80,6 @@ export const mapConfig = {
       source: {
         type: 'image',
         url: '',
-        volatile:true,
         coordinates: [
           [5.13211, 47.94587],
           [11.12701, 47.94587],
@@ -88,6 +87,7 @@ export const mapConfig = {
           [5.13211, 45.42068]
         ]
       } as ImageSourceSpecification,
+      volatile: true,
       layer: {
         id: 'wrf-layer',
         type: 'raster',
