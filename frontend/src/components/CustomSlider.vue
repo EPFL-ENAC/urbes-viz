@@ -10,7 +10,7 @@
 </template>
 
 <script setup lang="ts">
-import noUiSlider, { PipsMode } from 'nouislider'
+import noUiSlider, { PipsMode, type API } from 'nouislider'
 import 'nouislider/dist/nouislider.css'
 
 import { defineModel, onUnmounted, onMounted, ref } from 'vue'
@@ -65,6 +65,7 @@ const timecodes = [
 })
 
 const sliderHTML = ref<HTMLDivElement | null>(null)
+const slider = ref<API | null>(null)
 const playing = ref(false)
 const modelValue = defineModel<number>({ required: true })
 
@@ -118,9 +119,8 @@ const formatNumber = {
 
 const createSlider = () => {
   if (!sliderHTML.value) return
-
-  const slider = noUiSlider.create(sliderHTML.value, {
-    start: 0,
+  slider.value = noUiSlider.create(sliderHTML.value, {
+    start: modelValue.value,
     tooltips: [formatDate],
     format: formatNumber,
     range: {
@@ -137,7 +137,7 @@ const createSlider = () => {
     }
   })
 
-  slider.on('update', (value) => {
+  slider.value.on('update', (value) => {
     if (Number(value)) modelValue.value = Number(value) as number
   })
 }
@@ -147,8 +147,8 @@ const play = () => {
   playing.value = true
 
   playInterval = setInterval(() => {
-    modelValue.value = (modelValue.value + 1) % timecodes.length
-  }, 1000)
+    if (slider.value) slider.value.set(modelValue.value + 1)
+  }, 800)
 }
 
 const stop = () => {
