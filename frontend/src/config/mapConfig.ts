@@ -80,6 +80,7 @@ export const mapConfig = {
       source: {
         type: 'image',
         url: '',
+        volatile:true,
         coordinates: [
           [5.13211, 47.94587],
           [11.12701, 47.94587],
