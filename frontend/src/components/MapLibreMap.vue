@@ -71,7 +71,7 @@ const urlSource = computed(() => {
     minimumIntegerDigits: 3,
     useGrouping: false
   })
-  return baseURL + `/output_images_${props.variableSelected}/${props.variableSelected}_${id}.png`
+  return baseURL + `/wrf_${props.variableSelected}/${props.variableSelected}_${id}.png`
 })
 
 const updateWrfUrlSource = (url: string) => {
