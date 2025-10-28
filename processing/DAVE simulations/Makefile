@@ -38,7 +38,7 @@ upload:
 	s3cmd put --acl-public --guess-mime-type hourly_adult_population.pmtiles \
 		"s3://$${BUCKET_NAME}/urbes-viz/hourly_adult_population.pmtiles"
 	@echo "Upload complete"
-	@echo "File available at: https://enacit4r-cdn.epfl.ch/urbes-viz/hourly_adult_population.pmtiles"
+	@echo "File available at: https://enacit4r-cdn-s3.epfl.ch/urbes-viz/hourly_adult_population.pmtiles"
 
 clean:
 	@echo "Cleaning generated files"
