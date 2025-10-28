@@ -305,6 +305,52 @@ export const mapConfig = {
           ]
         }
       } as LayerSpecification
+    },
+    {
+      id: 'hourly_adult_population',
+      label: 'Hourly Adult Population',
+      unit: 'adults/500m²',
+      info: 'Source: DAVE Simulations, URBES',
+      source: {
+        type: 'vector',
+        url: `pmtiles://${baseUrl}/hourly_adult_population.pmtiles`
+      } as VectorSourceSpecification,
+      layer: {
+        id: 'hourly_adult_population-layer',
+        type: 'fill-extrusion',
+        source: 'hourly_adult_population',
+        'source-layer': 'hourly_adult_population_wgs84',
+        paint: {
+          // Height scaled to make high population areas tall
+          'fill-extrusion-height': [
+            '*',
+            ['get', 'hour_12'],
+            5 // Scale factor for height - adjust to make taller/shorter
+          ],
+          'fill-extrusion-base': 0,
+          'fill-extrusion-opacity': 0.8,
+          // Matplotlib 'cool' colormap: cyan -> blue -> magenta -> pink
+          'fill-extrusion-color': [
+            'interpolate',
+            ['linear'],
+            ['get', 'hour_12'],
+            0,
+            '#00FFFF', // Cyan (cool start)
+            500,
+            '#0080FF', // Blue
+            1000,
+            '#4000FF', // Purple
+            2000,
+            '#8000FF', // Violet
+            3000,
+            '#C000FF', // Magenta
+            4000,
+            '#FF00FF', // Bright magenta
+            5000,
+            '#FF80FF' // Pink (cool end)
+          ]
+        }
+      } as LayerSpecification
     }
   ] as MapLayerConfig[]
 }

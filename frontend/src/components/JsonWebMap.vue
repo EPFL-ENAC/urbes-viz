@@ -5,6 +5,7 @@ import { useTheme } from 'vuetify'
 import type { Parameters } from '@/utils/jsonWebMap'
 import { computed, ref, shallowRef, watch } from 'vue'
 import CustomSlider from '@/components/CustomSlider.vue'
+import HourlySlider from '@/components/HourlySlider.vue'
 import InfoTooltip from '@/components/InfoTooltip.vue'
 import LegendMap from '@/components/LegendMap.vue'
 import { mapConfig } from '@/config/mapConfig'
@@ -19,6 +20,15 @@ const parameters = shallowRef<Parameters>({})
 const variableSelected = ref<string>('u10')
 
 const idxImage = ref<number>(0)
+const selectedHour = ref<number>(12)
+const isPlaying = ref<boolean>(false)
+
+const handlePlayingChange = (playing: boolean) => {
+  isPlaying.value = playing
+  if (map.value?.setIsAnimating) {
+    map.value.setIsAnimating(playing)
+  }
+}
 
 const center = {
   lat: 46.882,
@@ -36,10 +46,14 @@ const possibleLayers = mapConfig.layers.map((d) => ({
 const layersSelected = ref<string[]>(['roads_swiss_statistics-layer'])
 
 const layersVisible = computed(() => {
+  console.log('layersSelected', mapConfig.layers, layersSelected.value)
   return mapConfig.layers.filter((layer) => layersSelected.value.includes(layer.layer.id) ?? false)
 })
 
 const isWrfSelected = computed(() => layersSelected.value.includes('wrf-layer'))
+const isHourlyPopulationSelected = computed(() =>
+  layersSelected.value.includes('hourly_adult_population-layer')
+)
 
 const syncAllLayersVisibility = (layersSelected: string[]) => {
   for (let { id: layer } of possibleLayers) {
@@ -54,6 +68,67 @@ watch(
   () => layersSelected.value,
   (layersSelected) => {
     syncAllLayersVisibility(layersSelected)
+  }
+)
+
+// Watch for hour changes and update the layer with interpolation
+watch(
+  () => selectedHour.value,
+  (hour) => {
+    if (!map.value || !isHourlyPopulationSelected.value) return
+
+    // Check if the layer exists before trying to update it
+    // We need to access the actual map instance to check for the layer
+    try {
+      const hourFloor = Math.floor(hour)
+      const hourCeil = Math.ceil(hour) % 24 // Wrap around to 0 after 23
+      const fraction = hour - hourFloor
+
+      const hourProperty1 = `hour_${hourFloor}`
+      const hourProperty2 = `hour_${hourCeil}`
+
+      // Create interpolated value expression
+      // interpolatedValue = value1 * (1 - fraction) + value2 * fraction
+      const interpolatedValue = [
+        '+',
+        ['*', ['get', hourProperty1], 1 - fraction],
+        ['*', ['get', hourProperty2], fraction]
+      ] as any
+
+      // Update height with interpolation
+      map.value.setPaintProperty('hourly_adult_population-layer', 'fill-extrusion-height', [
+        '*',
+        interpolatedValue,
+        5
+      ])
+
+      // Update color with interpolation
+      map.value.setPaintProperty('hourly_adult_population-layer', 'fill-extrusion-color', [
+        'interpolate',
+        ['linear'],
+        interpolatedValue,
+        0,
+        '#00FFFF',
+        500,
+        '#0080FF',
+        1000,
+        '#4000FF',
+        2000,
+        '#8000FF',
+        3000,
+        '#C000FF',
+        4000,
+        '#FF00FF',
+        5000,
+        '#FF80FF'
+      ])
+
+      // Update filter with interpolation
+      map.value.setFilter('hourly_adult_population-layer', ['>=', interpolatedValue, 5] as any)
+    } catch (error) {
+      // Layer doesn't exist yet, ignore the error
+      console.debug('Layer not ready yet:', error)
+    }
   }
 )
 
@@ -148,6 +223,12 @@ watch(
           <v-card-title> Time </v-card-title>
           <v-card-text>
             <custom-slider v-model="idxImage"> </custom-slider>
+          </v-card-text>
+        </v-card>
+        <v-card v-if="isHourlyPopulationSelected" flat class="mt-auto border-t-md pb-4 px-4">
+          <v-card-title> Hour of Day </v-card-title>
+          <v-card-text>
+            <hourly-slider v-model="selectedHour" @playing="handlePlayingChange"> </hourly-slider>
           </v-card-text>
         </v-card>
       </v-col>

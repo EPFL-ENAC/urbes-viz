@@ -64,6 +64,7 @@ const container = ref<HTMLDivElement | null>(null)
 let map: Maplibre | undefined = undefined
 const hasLoaded = ref(false)
 const protocol = new Protocol()
+const isAnimating = ref(false) // Track if animation is running
 
 const urlSource = computed(() => {
   const idx = ~~props.idxImage
@@ -131,6 +132,9 @@ onMounted(() => {
     }
 
     function handleDataEvent() {
+      // Skip loading indicator when animation is running
+      if (isAnimating.value) return
+
       if (map?.areTilesLoaded()) {
         loading.value = false
       } else {
@@ -173,7 +177,7 @@ const setFilter = (
   options?: StyleSetterOptions | undefined
 ) => {
   if (hasLoaded.value) {
-    throttle(() => map?.setFilter(layerId, filter, options), layerId + '-filter', 100)
+    throttle(() => map?.setFilter(layerId, filter, options), layerId + '-filter', 50)
   }
 }
 
@@ -184,7 +188,7 @@ const setPaintProperty = (
   options?: StyleSetterOptions | undefined
 ) => {
   if (hasLoaded.value)
-    throttle(() => map?.setPaintProperty(layerId, name, value, options), layerId + '-paint', 100)
+    throttle(() => map?.setPaintProperty(layerId, name, value, options), layerId + '-paint', 50)
 }
 
 const queryFeatures = (filter: any[]) => {
@@ -221,6 +225,10 @@ const getPaintProperty = (layerId: string, name: string) => {
   if (hasLoaded.value) return map?.getPaintProperty(layerId, name)
 }
 
+const setIsAnimating = (value: boolean) => {
+  isAnimating.value = value
+}
+
 defineExpose({
   getPaintProperty,
   update,
@@ -232,7 +240,8 @@ defineExpose({
   changeSourceTilesUrl,
   setLayerVisibility,
   getSourceTilesUrl,
-  filterLayers
+  filterLayers,
+  setIsAnimating
 })
 
 watch(
@@ -303,7 +312,7 @@ function filterLayers(filterIds?: string[]) {
 <template>
   <v-container class="pa-0 position-relative fill-height" fluid>
     <div ref="container" class="map fill-height">
-      <loading-circle :loading="loading" />
+      <loading-circle v-if="!isAnimating" :loading="loading" />
     </div>
     <slot name="legend"></slot>
   </v-container>
