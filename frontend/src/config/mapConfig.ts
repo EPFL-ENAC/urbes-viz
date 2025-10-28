@@ -320,6 +320,7 @@ export const mapConfig = {
         type: 'fill-extrusion',
         source: 'hourly_adult_population',
         'source-layer': 'hourly_adult_population_wgs84',
+        filter: ['>=', ['get', 'hour_12'], 5],
         paint: {
           // Height scaled to make high population areas tall
           'fill-extrusion-height': [
@@ -335,7 +336,7 @@ export const mapConfig = {
             ['linear'],
             ['get', 'hour_12'],
             0,
-            '#00FFFF', // Cyan (cool start)
+            '#00ffff', // Cyan (cool start)
             500,
             '#0080FF', // Blue
             1000,

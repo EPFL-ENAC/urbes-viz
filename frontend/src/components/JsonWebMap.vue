@@ -43,7 +43,7 @@ const possibleLayers = mapConfig.layers.map((d) => ({
   info: d.info
 }))
 
-const layersSelected = ref<string[]>(['roads_swiss_statistics-layer'])
+const layersSelected = ref<string[]>(['hourly_adult_population-layer'])
 
 const layersVisible = computed(() => {
   console.log('layersSelected', mapConfig.layers, layersSelected.value)
@@ -102,13 +102,21 @@ watch(
         5
       ])
 
+      map.value.setPaintProperty('hourly_adult_population-layer', 'filter', [
+        '>=',
+        ['get', interpolatedValue],
+        15
+      ])
+
       // Update color with interpolation
       map.value.setPaintProperty('hourly_adult_population-layer', 'fill-extrusion-color', [
         'interpolate',
         ['linear'],
         interpolatedValue,
         0,
-        '#00FFFF',
+        'rgba(0, 255, 255, 0)',
+        10,
+        '#00ffff', // Cyan (cool start)
         500,
         '#0080FF',
         1000,
@@ -122,9 +130,6 @@ watch(
         5000,
         '#FF80FF'
       ])
-
-      // Update filter with interpolation
-      map.value.setFilter('hourly_adult_population-layer', ['>=', interpolatedValue, 5] as any)
     } catch (error) {
       // Layer doesn't exist yet, ignore the error
       console.debug('Layer not ready yet:', error)
