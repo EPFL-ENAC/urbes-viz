@@ -313,7 +313,7 @@ export const mapConfig = {
       info: 'Source: DAVE Simulations, URBES',
       source: {
         type: 'vector',
-        url: `pmtiles://${baseUrl}/hourly_adult_population.pmtiles`
+        url: `pmtiles://${baseUrl}/hourly_adult_pop.pmtiles`
       } as VectorSourceSpecification,
       layer: {
         id: 'hourly_adult_population-layer',
