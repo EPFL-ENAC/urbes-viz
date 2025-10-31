@@ -114,6 +114,7 @@ If your dataset has too many dimensions, ensure the GeoJSON is in 2D format befo
 1. Open the S3 web interface: [https://s3.epfl.ch/\_/s3browser](https://s3.epfl.ch/_/s3browser)
 2. Log in using the provided access and secret key credentials.
    - **Warning**: These credentials are sensitive. Do not share them.
+   - **Important**: This is a specific S3 bucket for URBES-Viz, not the usual ENACIT4R CDN bucket.
 3. Use the web interface to upload your processed files (e.g., GeoJSON or PMTiles).
 
 #### b. Confirm File Accessibility
