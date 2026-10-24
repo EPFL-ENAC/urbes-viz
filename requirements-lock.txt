@@ -1,5 +1,5 @@
 asttokens==2.4.1
-certifi==2024.6.2
+certifi==2026.10.19
 cftime==1.6.4
 comm==0.2.2
 contourpy==1.2.1
